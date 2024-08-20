@@ -90,8 +90,8 @@ function App() {
     <>
       {/* 모든 컴포넌트에서 data state 값을 공급 가능 */}
       <DiaryStateContext.Provider value={data}>
-        {/* 모든 컴포넌트에서 onCreate, onUpdate, onDelete 상태변화 함수 공급 가능 */}
-        <DiaryDispatchContext.Provider value={(onCreate, onUpdate, onDelete)}>
+        {/* 모든 컴포넌트에서 객체로 { onCreate, onUpdate, onDelete } 상태변화 함수 공급 가능 */}
+        <DiaryDispatchContext.Provider value={{ onCreate, onUpdate, onDelete }}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/new" element={<New />} />
