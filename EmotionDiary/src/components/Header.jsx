@@ -1,4 +1,4 @@
-import './Header.css';
+import "./Header.css";
 
 const Header = ({ title, leftChild, rightChild }) => {
   return (
