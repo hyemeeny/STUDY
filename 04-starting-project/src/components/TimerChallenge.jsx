@@ -8,39 +8,58 @@ export default function TimerChallenge({ title, targetTime }) {
   const timer = useRef();
   const dialog = useRef();
 
-  const [timerStarted, setTimerStarted] = useState(false);
-  const [timerExpired, setTimerExpired] = useState(false); // 타이머 만료
+  // 간격이 10 밀리초이므로 targetTime * 1000가 초기값
+  const [timeRemaining, setTimeRemaining] = useState(targetTime * 1000);
 
-  function handleStart() {
-    timer.current = setTimeout(() => {
-      setTimerExpired(true);
-      // dialog는 .showModal() 메소드를 가지고 있다.
-      // .showModal() 메소드는 호출하면 보이도록 바뀐다.
-      dialog.current.open();
-    }, targetTime * 1000);
+  const timerIsActive = timeRemaining > 0 && timeRemaining < targetTime * 1000;
 
-    setTimerStarted(true);
+  // 타이머가 자동으로 멈출 때 (졌을 때)
+  if (timeRemaining <= 0) {
+    clearInterval(timer.current);
+    // dialog 참조에 저장되며 ResultModal 컴포넌트에 open 객체와 연결된다. ResultModal의 open 메소드는 여기서 호출된다.
+    dialog.current.open();
   }
 
+  // 타이머가 자동으로 멈출 때 선언하면 매번 초기값으로 변경되므로 함수를 따로 만들어서 재설정해야한다.
+  function handleReset() {
+    setTimeRemaining(targetTime * 1000);
+  }
+
+  function handleStart() {
+    // setInterval(간격설정) 시간이 얼마 남았는지 알려준다.
+    timer.current = setInterval(() => {
+      // 10 밀리초마다 업데이트
+      setTimeRemaining((prevTimeRemaining) => prevTimeRemaining - 10);
+    }, 10);
+  }
+
+  // 타이머를 수동으로 멈출 때 (이겼을 때)
   function handleStop() {
-    clearTimeout(timer.current);
+    dialog.current.open();
+    // 변수나 상태가 아닌 참조를 사용해야한다. timer.current
+    clearInterval(timer.current);
   }
 
   return (
     <>
-      <ResultModal ref={dialog} targetTime={targetTime} result="lost" />
+      <ResultModal
+        ref={dialog}
+        targetTime={targetTime}
+        remainingTime={timeRemaining}
+        onReset={handleReset}
+      />
       <section className="challenge">
         <h2>{title}</h2>
         <p className="challenge-time">
           {targetTime} second{targetTime > 1 ? "s" : ""}
         </p>
         <p>
-          <button onClick={timerStarted ? handleStop : handleStart}>
-            {timerStarted ? "Stop" : "Start"} Challenge
+          <button onClick={timerIsActive ? handleStop : handleStart}>
+            {timerIsActive ? "Stop" : "Start"} Challenge
           </button>
         </p>
-        <p className={timerStarted ? "active" : undefined}>
-          {timerStarted ? "타이머 실행 중 ..." : "타이머 비활성화"}
+        <p className={timerIsActive ? "active" : undefined}>
+          {timerIsActive ? "타이머 실행 중 ..." : "타이머 비활성화"}
         </p>
       </section>
     </>
